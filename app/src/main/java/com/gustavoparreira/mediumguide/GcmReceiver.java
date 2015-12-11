@@ -14,6 +14,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import ibt.ortc.extensibility.GcmOrtcBroadcastReceiver;
+import ibt.ortc.plugins.IbtRealtimeSJ.OrtcMessage;
 
 
 public class GcmReceiver extends GcmOrtcBroadcastReceiver {
@@ -34,36 +35,6 @@ public class GcmReceiver extends GcmOrtcBroadcastReceiver {
         }
     }
 
-    private String parseOrtcMessage(String ortcMessage) {
-
-        // Automatic ORTC push messages have the following format:
-        // <msg_id>_1-1_<message sent by user>
-
-        try {
-
-        Matcher parsedMessageMatcher = messagePattern.matcher(ortcMessage);
-        String parsedMessage = "";
-
-        try{
-            if (parsedMessageMatcher.matches()) {
-                parsedMessage = parsedMessageMatcher.group(4);
-            }
-        } catch (Exception parseException){
-            // probably a custom push message, use the received string with no parsing
-            parsedMessage = ortcMessage;
-        }
-
-        if(parsedMessage == "") {
-            // there's something wrong with the message format. Use the unparsed format.
-            parsedMessage = ortcMessage;
-        }
-
-        return parsedMessage;
-        } catch (NullPointerException  e) {
-            return null;
-        }
-    }
-
     public void createNotification(Context context, Bundle extras)
     {
         String message = extras.getString("M");
@@ -72,7 +43,7 @@ public class GcmReceiver extends GcmOrtcBroadcastReceiver {
 
         if (message != "") {
 
-            String parsedMessage = parseOrtcMessage(message);
+            String parsedMessage = OrtcMessage.parseOrtcMultipartMessage(message);
 
             if (parsedMessage != null) {
 
